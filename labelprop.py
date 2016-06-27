@@ -2,10 +2,9 @@
 # @Author: ZwEin
 # @Date:   2016-06-24 14:56:40
 # @Last Modified by:   ZwEin
-# @Last Modified time: 2016-06-27 13:30:18
+# @Last Modified time: 2016-06-27 13:39:33
 
 import ast
-import heapq
 
 class Edge():
     def __init__(self, src, dest, weight):
@@ -53,11 +52,6 @@ class LabelProp():
         # setup vertex_f_map
         v_set = self.vertex_label_map.keys()
         l_set = []
-        # for v in v_set:
-        #     l = self.vertex_label_map[v]
-        #     heapq.heappush(l_set, l)
-        #     self.vertex_size += 1
-        # print heapq.nsmallest(len(l_set), l_set)
         for v in v_set:
             l = self.vertex_label_map[v]
             l_set.append(l)
@@ -66,13 +60,11 @@ class LabelProp():
 
         label_enum = 0
         for l in l_set:
-        # for l in heapq.nsmallest(len(l_set), l_set):
             if int(l) == 0:
                 continue
             self.label_index_map[l] = label_enum
             label_enum += 1
         self.label_size = label_enum
-        print label_enum
 
         self.labelled_size = 0
         for v in v_set:
@@ -100,6 +92,7 @@ class LabelProp():
             self.load_data_from_mem(lines)
 
     def load_data_from_mem(self, data):
+        self.initialize_env()
         for line in data:
             line = line.strip()
             self.process_data_line(line)
@@ -127,14 +120,6 @@ class LabelProp():
         except Exception as e:
 
             raise Exception("Coundn't parse vertex from line: ", line, e)
-
-        
-
-    def show_detail(self):
-        print "Number of vertices:            ", self.vertex_size
-        print "Number of class labels:        ", self.label_size
-        print "Number of unlabeled vertices:  ", (self.vertex_size - self.labelled_size)
-        print "Numebr of labeled vertices:    ", self.labelled_size
 
     def debug(self):
         labels = []
@@ -199,37 +184,38 @@ class LabelProp():
         return diff
 
 
-    def run(self, eps, max_iter):
-        self.show_detail()
-        print "eps:                           ", eps
-        print "max iteration                  ", max_iter
-
+    def run(self, eps, max_iter, show_log=False):
         diff = 0.
-        iteration = 0
         for i in xrange(max_iter):
-            iteration = i
             diff = self.iterate()
             if diff < eps:
                 break
-            if i % 50 == 49:
-                print '\n'
 
-        print "\niter = ", (iteration + 1), ", eps = ", diff
+        if show_log:
+            self.show_detail(diff, eps, max_iter) 
 
         return self.debug()
+
+    def show_detail(self, diff, eps, max_iter):
+        print "Number of vertices:            ", self.vertex_size
+        print "Number of class labels:        ", self.label_size
+        print "Number of unlabeled vertices:  ", (self.vertex_size - self.labelled_size)
+        print "Numebr of labeled vertices:    ", self.labelled_size
+        print "eps:                           ", eps
+        print "max iteration                  ", max_iter
+        print "\niter = ", max_iter, ", eps = ", diff
 
     def show_vertex_adj(self):
         for k, v in self.vertex_adj_map.items():
             print str([4, [[_.src, _.dest, _.weight] for _ in v]])
 
 
+
 if __name__ == '__main__':
     labelprop = LabelProp()
     labelprop.load_data_from_file('data/sample.json')
     # labelprop.show_vertex_adj()
-
-
-    ans = labelprop.run(0.00001, 1000)
+    ans = labelprop.run(0.00001, 1000, show_log=True)
 
     with open('data/lpop.json', 'wb') as f:
         for line in ans:
