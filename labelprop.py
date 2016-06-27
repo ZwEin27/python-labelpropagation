@@ -2,7 +2,7 @@
 # @Author: ZwEin
 # @Date:   2016-06-24 14:56:40
 # @Last Modified by:   ZwEin
-# @Last Modified time: 2016-06-27 14:49:06
+# @Last Modified time: 2016-06-27 15:50:27
 
 class Edge():
     def __init__(self, src, dest, weight):
@@ -228,11 +228,10 @@ class LabelProp():
 
 if __name__ == '__main__':
     labelprop = LabelProp()
-    labelprop.load_data_from_file('data/knn_graph.json')
-    # labelprop.show_vertex_adj()
+    labelprop.load_data_from_file('data/sample.json')
     ans = labelprop.run(0.00001, 100, show_log=True, clean_result=True)
 
-    with open('data/knn_lpop.json', 'wb') as f:
+    with open('data/lpop.json', 'wb') as f:
         for line in ans:
             f.write(str(line) + '\n')
 
