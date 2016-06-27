@@ -2,7 +2,7 @@
 # @Author: ZwEin
 # @Date:   2016-06-24 14:56:40
 # @Last Modified by:   ZwEin
-# @Last Modified time: 2016-06-27 12:26:34
+# @Last Modified time: 2016-06-27 13:30:18
 
 import ast
 import heapq
@@ -12,10 +12,6 @@ class Edge():
         self.src = src
         self.dest = dest
         self.weight = weight
-
-
-
-
 
 class LabelProp():
 
@@ -33,7 +29,6 @@ class LabelProp():
         self.label_size = 0
         self.labelled_size = 0
         
-
     def setup_env(self):
 
         # initialize vertex_in_adj_map
@@ -58,20 +53,28 @@ class LabelProp():
         # setup vertex_f_map
         v_set = self.vertex_label_map.keys()
         l_set = []
+        # for v in v_set:
+        #     l = self.vertex_label_map[v]
+        #     heapq.heappush(l_set, l)
+        #     self.vertex_size += 1
+        # print heapq.nsmallest(len(l_set), l_set)
         for v in v_set:
             l = self.vertex_label_map[v]
-            heapq.heappush(l_set, l)
-            self.vertex_size += 1
+            l_set.append(l)
+        l_set = list(set(self.vertex_label_map.values()))
+        l_set.sort()
 
         label_enum = 0
-        for l in heapq.nsmallest(len(l_set), l_set):
+        for l in l_set:
+        # for l in heapq.nsmallest(len(l_set), l_set):
             if int(l) == 0:
                 continue
             self.label_index_map[l] = label_enum
             label_enum += 1
         self.label_size = label_enum
+        print label_enum
 
-        labelled_size = 0
+        self.labelled_size = 0
         for v in v_set:
             arr = []
             l = int(self.vertex_label_map[v])
@@ -81,14 +84,14 @@ class LabelProp():
                     arr.append(.0)
             else:
                 # labelled
-                labelled_size += 1
+                self.labelled_size += 1
                 ix = int(self.label_index_map[self.vertex_label_map[v]])
                 for i in range(label_enum):
                     if i == ix:
                         arr.append(1.)
                     else:
                         arr.append(0.)
-            self.vertex_f_map[v] = arr
+            self.vertex_f_map.setdefault(v, arr)
 
 
     def load_data_from_file(self, filename):
@@ -129,32 +132,33 @@ class LabelProp():
 
     def show_detail(self):
         print "Number of vertices:            ", self.vertex_size
-        print "Number of class labels:        ", self.labelSize
-        print "Number of unlabeled vertices:  ", (self.vertexSize - self.labeledSize)
-        print "Numebr of labeled vertices:    ", self.labeledSize
+        print "Number of class labels:        ", self.label_size
+        print "Number of unlabeled vertices:  ", (self.vertex_size - self.labelled_size)
+        print "Numebr of labeled vertices:    ", self.labelled_size
 
     def debug(self):
         labels = []
         for label in self.label_index_map.keys():
             labels.insert(int(self.label_index_map[label]), label)
-        ans = [vertex_id]
+        ans = []
         for vertex_id in self.vertex_f_map.keys():
-            arr = float(self.vertex_f_map[vertex_id])
+            arr = self.vertex_f_map[vertex_id]
             max_f_val = .0
             max_f_val_idx = 0
-
+            vi_ans = [vertex_id]
             im_ans = []
             for i in range(len(labels)):
                 f_val = arr[i]
                 if f_val > max_f_val:
                     max_f_val = f_val
                     max_f_val_idx = i
-                im_ans.append([labels[i, arr[i]]])
+                im_ans.append([labels[i], arr[i]])
 
-            ans.append(labels[max_f_val_idx])
-            ans.append(im_ans)
+            vi_ans.append(labels[max_f_val_idx])
+            vi_ans.append(im_ans)
+            ans.append(vi_ans)
 
-            return ans
+        return ans
 
 
     def iterate(self):
@@ -198,30 +202,38 @@ class LabelProp():
     def run(self, eps, max_iter):
         self.show_detail()
         print "eps:                           ", eps
-        print "max iteration                  ", maxIter
+        print "max iteration                  ", max_iter
 
         diff = 0.
         iteration = 0
         for i in xrange(max_iter):
             iteration = i
-            print '.'
             diff = self.iterate()
             if diff < eps:
                 break
             if i % 50 == 49:
                 print '\n'
 
-        print "\niter = " + (iteration + 1) + ", eps = " + diff
+        print "\niter = ", (iteration + 1), ", eps = ", diff
 
-        self.debug()
+        return self.debug()
 
+    def show_vertex_adj(self):
+        for k, v in self.vertex_adj_map.items():
+            print str([4, [[_.src, _.dest, _.weight] for _ in v]])
 
 
 if __name__ == '__main__':
     labelprop = LabelProp()
     labelprop.load_data_from_file('data/sample.json')
+    # labelprop.show_vertex_adj()
 
 
+    ans = labelprop.run(0.00001, 1000)
+
+    with open('data/lpop.json', 'wb') as f:
+        for line in ans:
+            f.write(str(line) + '\n')
 
 
 
