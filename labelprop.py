@@ -2,9 +2,7 @@
 # @Author: ZwEin
 # @Date:   2016-06-24 14:56:40
 # @Last Modified by:   ZwEin
-# @Last Modified time: 2016-06-27 13:39:33
-
-import ast
+# @Last Modified time: 2016-06-27 14:49:06
 
 class Edge():
     def __init__(self, src, dest, weight):
@@ -17,6 +15,10 @@ class LabelProp():
     def __init__(self):
         self.initialize_env()
 
+################################################################################
+#   Prepare Data
+################################################################################
+
     def initialize_env(self):
         self.vertex_adj_map = {}         # int: [Edge]
         self.vertex_in_adj_map = {}      # int: float
@@ -27,7 +29,7 @@ class LabelProp():
         self.vertex_size = 0
         self.label_size = 0
         self.labelled_size = 0
-        
+
     def setup_env(self):
 
         # initialize vertex_in_adj_map
@@ -51,11 +53,8 @@ class LabelProp():
 
         # setup vertex_f_map
         v_set = self.vertex_label_map.keys()
-        l_set = []
-        for v in v_set:
-            l = self.vertex_label_map[v]
-            l_set.append(l)
-        l_set = list(set(self.vertex_label_map.values()))
+        l_set = self.vertex_label_map.values()
+        l_set = list(set(l_set))
         l_set.sort()
 
         label_enum = 0
@@ -87,25 +86,23 @@ class LabelProp():
 
 
     def load_data_from_file(self, filename):
+        import ast
         with open(filename, 'rb') as f:
-            lines = f.readlines()
+            lines = [ast.literal_eval(_.strip()) for _ in f.readlines()]
             self.load_data_from_mem(lines)
 
     def load_data_from_mem(self, data):
         self.initialize_env()
         for line in data:
-            line = line.strip()
             self.process_data_line(line)
         self.setup_env()
 
-    def process_data_line(self, dataline):
+    def process_data_line(self, line):
         # [vertexId, vertexLabel, [edges]]
         # unlabeled vertex if vertexLabel == 0
         # i.e. [2, 1, [[1, 1.0], [3, 1.0]]]
         
         try:
-
-            line = ast.literal_eval(dataline)
             vertex_id = line[0]
             vertex_label = line[1]
             edges = line[2]
@@ -119,7 +116,11 @@ class LabelProp():
 
         except Exception as e:
 
-            raise Exception("Coundn't parse vertex from line: ", line, e)
+            raise Exception("Coundn't parse vertex from line")
+
+################################################################################
+#   Label Propagation
+################################################################################
 
     def debug(self):
         labels = []
@@ -130,8 +131,8 @@ class LabelProp():
             arr = self.vertex_f_map[vertex_id]
             max_f_val = .0
             max_f_val_idx = 0
-            vi_ans = [vertex_id]
-            im_ans = []
+
+            im_ans = [vertex_id]
             for i in range(len(labels)):
                 f_val = arr[i]
                 if f_val > max_f_val:
@@ -139,9 +140,8 @@ class LabelProp():
                     max_f_val_idx = i
                 im_ans.append([labels[i], arr[i]])
 
-            vi_ans.append(labels[max_f_val_idx])
-            vi_ans.append(im_ans)
-            ans.append(vi_ans)
+            im_ans.insert(1, labels[max_f_val_idx])
+            ans.append(im_ans)
 
         return ans
 
@@ -184,7 +184,7 @@ class LabelProp():
         return diff
 
 
-    def run(self, eps, max_iter, show_log=False):
+    def run(self, eps, max_iter, show_log=False, clean_result=False):
         diff = 0.
         for i in xrange(max_iter):
             diff = self.iterate()
@@ -194,7 +194,23 @@ class LabelProp():
         if show_log:
             self.show_detail(diff, eps, max_iter) 
 
-        return self.debug()
+        ans = self.debug()
+
+        if clean_result:
+            rtn_cleaned = []
+            for line in ans:
+                try:
+                    score = sum([float(_[1]) for _ in line[2:]])
+                    if score:
+                        rtn_cleaned.append([line[0], line[1], score])
+                except Exception as e:
+                    raise Exception('r')
+            ans = rtn_cleaned
+        return ans
+
+################################################################################
+#   Show Info.
+################################################################################
 
     def show_detail(self, diff, eps, max_iter):
         print "Number of vertices:            ", self.vertex_size
@@ -210,14 +226,13 @@ class LabelProp():
             print str([4, [[_.src, _.dest, _.weight] for _ in v]])
 
 
-
 if __name__ == '__main__':
     labelprop = LabelProp()
-    labelprop.load_data_from_file('data/sample.json')
+    labelprop.load_data_from_file('data/knn_graph.json')
     # labelprop.show_vertex_adj()
-    ans = labelprop.run(0.00001, 1000, show_log=True)
+    ans = labelprop.run(0.00001, 100, show_log=True, clean_result=True)
 
-    with open('data/lpop.json', 'wb') as f:
+    with open('data/knn_lpop.json', 'wb') as f:
         for line in ans:
             f.write(str(line) + '\n')
 
