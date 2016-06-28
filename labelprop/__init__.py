@@ -2,7 +2,7 @@
 # @Author: ZwEin
 # @Date:   2016-06-24 14:56:40
 # @Last Modified by:   ZwEin
-# @Last Modified time: 2016-06-27 15:50:27
+# @Last Modified time: 2016-06-27 16:14:00
 
 class Edge():
     def __init__(self, src, dest, weight):
