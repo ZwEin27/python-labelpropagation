@@ -10,7 +10,7 @@ Inspired by smly's [java-labelpropagation](https://github.com/smly/java-labelpro
 
 or 
 
-    pip install pylabelprop
+    pip install labelprop
 
 
 ## Usage
