@@ -19,22 +19,22 @@ initialize labelprop
 
     from labelprop import LabelProp
 
-    labelprop = LabelProp()
+    lp = LabelProp()
 
 
 load data from file
 
-    labelprop.load_data_from_file('<FILE_NAME>')
+    lp.load_data_from_file('<FILE_NAME>')
 
 load data from memory
 
-    labelprop.load_data_from_mem('<LOADED_DATA_IN_MEMORY>')
+    lp.load_data_from_mem('<LOADED_DATA_IN_MEMORY>')
 
 conduct label propagation
     
     """ template
 
-    labelprop.run(<EPS>, <MAX_ITER>, show_log=<True/False>, clean_result=<True/False>)
+    lp.run(<EPS>, <MAX_ITER>, show_log=<True/False>, clean_result=<True/False>)
         <EPS>: threshold
         <MAX_ITER>: max interation
         show_log: show report
@@ -43,7 +43,7 @@ conduct label propagation
     """
     
     # sample
-    ans = labelprop.run(0.00001, 100, show_log=True, clean_result=True) 
+    ans = lp.run(0.00001, 100, show_log=True, clean_result=True) 
 
 ## Data Format
 
@@ -71,7 +71,7 @@ Example
 
 set show_log as True (default Fasle), like
     
-    labelprop.run(0.00001, 100, show_log=True) 
+    lp.run(0.00001, 100, show_log=True) 
 
 Example
 
@@ -88,7 +88,7 @@ Example
 
 set clean_result as False, like
     
-    labelprop.run(0.00001, 100, clean_result=False) 
+    lp.run(0.00001, 100, clean_result=False) 
 
 each line is in list format, which contains
 
@@ -112,7 +112,7 @@ Example
 
 set clean_result as True, like
     
-    labelprop.run(0.00001, 100, clean_result=True) 
+    lp.run(0.00001, 100, clean_result=True) 
 
 each line is in list format, which contains
 
