@@ -15,9 +15,9 @@ or
 
 ## Usage
 
-initialize pylabelprop
+initialize labelprop
 
-    import pylabelprop
+    from labelprop import LabelProp
 
     labelprop = LabelProp()
 
