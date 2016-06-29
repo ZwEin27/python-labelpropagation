@@ -49,7 +49,7 @@ conduct label propagation
 
 ### Input Data Format
 
-each line is in list format, c contains
+each line is in list format, which contains
 
 - list[0]: node id
 - list[1]: label, use 0 if unknown
